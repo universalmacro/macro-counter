@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">MACRO Counter</string>
+    <string name="hide_password">Hide password</string>
+    <string name="show_password">Show password</string>
+    <string name="login">Login</string>
+    <string name="username">用戶名或郵箱</string>
+    <string name="passord">密碼</string>
+
+</resources>
