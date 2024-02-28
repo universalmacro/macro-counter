@@ -58,8 +58,34 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material:material")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
+
+    //accompanist
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.24.3-alpha")
+    implementation ("com.google.accompanist:accompanist-insets:0.24.3-alpha")
+    implementation ("com.google.accompanist:accompanist-pager:0.24.3-alpha")
+    implementation ("com.google.accompanist:accompanist-navigation-animation:0.24.3-alpha")
+    implementation ("com.google.accompanist:accompanist-placeholder-material:0.24.3-alpha")
+    implementation ("com.google.accompanist:accompanist-swiperefresh:0.24.3-alpha")
+
+    implementation ("androidx.constraintlayout:constraintlayout-compose:1.0.0")
+
+    //图片加载
+    implementation("io.coil-kt:coil-compose:2.0.0-rc01")
+
+    //datastore
+    implementation ("androidx.datastore:datastore-preferences:1.0.0")
+
+    // Retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+//    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+    implementation("com.squareup.moshi:moshi-kotlin:1.13.0")
+
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -67,4 +93,6 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+
 }
