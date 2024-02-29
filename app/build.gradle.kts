@@ -62,6 +62,10 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
 
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.4.1")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1")
+    implementation ("androidx.activity:activity-compose:1.4.0")
+
     //accompanist
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.24.3-alpha")
     implementation ("com.google.accompanist:accompanist-insets:0.24.3-alpha")
@@ -84,7 +88,7 @@ dependencies {
 
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.13.0")
-
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

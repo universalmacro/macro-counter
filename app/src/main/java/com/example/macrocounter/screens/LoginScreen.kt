@@ -73,14 +73,14 @@ import com.example.macrocounter.viewModel.UserViewModel
 import androidx.compose.runtime.CompositionLocalProvider
 
 @Composable
-fun LoginScreen(){
+fun LoginScreen(onClose: () -> Unit){
     Surface (
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
             .padding(28.dp)
     ) {
-        CompositionLocalProvider(LocalUserViewModel provides UserViewModel(LocalContext.current)) {
+//        CompositionLocalProvider(LocalUserViewModel provides UserViewModel(LocalContext.current)) {
 
 
         val passwordVisible = remember {
@@ -88,12 +88,12 @@ fun LoginScreen(){
         }
 
 
-        val username = remember {
-            mutableStateOf("")
-        }
-        val password = remember {
-            mutableStateOf("")
-        }
+//        val username = remember {
+//            mutableStateOf("")
+//        }
+//        val password = remember {
+//            mutableStateOf("")
+//        }
 
         val userViewModel = LocalUserViewModel.current
         val coroutineScope = rememberCoroutineScope()
@@ -113,12 +113,12 @@ fun LoginScreen(){
 //                id = R.drawable.ic_launcher_foreground
 //            ))
             SimpleOutlinedTextFieldSample(
-                value = username.value,
-                onValueChange = { username.value = it })
+                value = userViewModel.account,
+                onValueChange = { userViewModel.account = it })
             Spacer(modifier = Modifier.height(20.dp))
             SimpleOutlinedPasswordTextField(
-                value = password.value,
-                onValueChange = { password.value = it })
+                value = userViewModel.password,
+                onValueChange = { userViewModel.password = it })
 //            PasswordTextField(labelValue = stringResource(id = R.string.passord), painterResource = painterResource(
 //                id = R.drawable.ic_launcher_foreground
 //            ))
@@ -126,10 +126,8 @@ fun LoginScreen(){
 
             Button(
                 onClick = {
-                    Log.d("LoginPage", " ${username.value} + : ${password.value}")
-
-                    coroutineScope.launch {
-                        userViewModel.login()
+                    coroutineScope.launch{
+                        userViewModel.login(onClose = onClose)
 
                     }
                 },
@@ -142,16 +140,16 @@ fun LoginScreen(){
                 )
             }
         }
-    }
+//    }
     }
 }
 
-
-@Preview
-@Composable
-fun LoginScreenPreview(){
-    LoginScreen()
-}
+//
+//@Preview
+//@Composable
+//fun LoginScreenPreview(){
+//    LoginScreen()
+//}
 
 
 

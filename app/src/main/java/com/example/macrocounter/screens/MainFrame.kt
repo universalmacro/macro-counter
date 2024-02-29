@@ -20,13 +20,13 @@ import com.example.macrocounter.model.entity.NavigationItem
 fun MainFrame(
     onNavigateToArticle: () -> Unit = {},
     onNavigateToVideo: () -> Unit = {},
-    onNavigateToStudyHistory: () -> Unit = {}
+    onNavigateToSpace: () -> Unit = {}
 ) {
 
     val navigationItems = listOf(
-        NavigationItem(title = "学习", icon = Icons.Filled.Home),
-        NavigationItem(title = "任务", icon = Icons.Filled.DateRange),
-        NavigationItem(title = "我的", icon = Icons.Filled.Person),
+        NavigationItem(title = "空間", icon = Icons.Filled.Home),
+//        NavigationItem(title = "任务", icon = Icons.Filled.DateRange),
+        NavigationItem(title = "設置", icon = Icons.Filled.Person),
     )
 
     var currentNavigationIndex by remember {
