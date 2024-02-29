@@ -28,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,9 +52,10 @@ import com.example.macrocounter.R
 import com.example.macrocounter.components.CommonTextField
 import com.example.macrocounter.components.HeadingTextComponent
 import com.example.macrocounter.components.PasswordTextField
-
-
+import kotlinx.coroutines.launch
+import com.example.macrocounter.compositionLocal.LocalUserViewModel
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 
@@ -66,7 +68,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
+import androidx.compose.ui.platform.LocalContext
+import com.example.macrocounter.viewModel.UserViewModel
+import androidx.compose.runtime.CompositionLocalProvider
 
 @Composable
 fun LoginScreen(){
@@ -75,39 +79,46 @@ fun LoginScreen(){
             .fillMaxSize()
             .background(Color.White)
             .padding(28.dp)
-    ){
+    ) {
+        CompositionLocalProvider(LocalUserViewModel provides UserViewModel(LocalContext.current)) {
+
 
         val passwordVisible = remember {
             mutableStateOf(false)
         }
 
 
-        val email = remember {
+        val username = remember {
             mutableStateOf("")
         }
         val password = remember {
             mutableStateOf("")
         }
 
+        val userViewModel = LocalUserViewModel.current
+        val coroutineScope = rememberCoroutineScope()
 
-        Column (
+        Column(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-            ,
+                .verticalScroll(rememberScrollState()),
 
             horizontalAlignment = Alignment.CenterHorizontally
-        ){
+        ) {
             NormalTextComponent(value = stringResource(id = R.string.app_name))
             HeadingTextComponent(value = stringResource(id = R.string.login))
             Spacer(modifier = Modifier.height(30.dp))
 //            CommonTextField(labelValue = stringResource(id = R.string.username), painterResource = painterResource(
 //                id = R.drawable.ic_launcher_foreground
 //            ))
-            SimpleOutlinedTextFieldSample(value = email.value, onValueChange = { email.value = it})
+            SimpleOutlinedTextFieldSample(
+                value = username.value,
+                onValueChange = { username.value = it })
             Spacer(modifier = Modifier.height(20.dp))
-            SimpleOutlinedPasswordTextField(value = password.value, onValueChange = { password.value = it})
+            SimpleOutlinedPasswordTextField(
+                value = password.value,
+                onValueChange = { password.value = it })
 //            PasswordTextField(labelValue = stringResource(id = R.string.passord), painterResource = painterResource(
 //                id = R.drawable.ic_launcher_foreground
 //            ))
@@ -115,18 +126,23 @@ fun LoginScreen(){
 
             Button(
                 onClick = {
-                    Log.d("LoginPage", "signIn: + ${email.value} + : ${password.value}" )
+                    Log.d("LoginPage", " ${username.value} + : ${password.value}")
+
+                    coroutineScope.launch {
+                        userViewModel.login()
+
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth(0.6f)
                     .height(50.dp),
-            ){
+            ) {
                 Text(
                     text = "登錄"
                 )
             }
         }
-
+    }
     }
 }
 
@@ -153,7 +169,7 @@ fun SimpleOutlinedTextFieldSample(
         onValueChange = onValueChange,
         shape = RoundedCornerShape(topEnd =12.dp, bottomStart =12.dp),
         label = {
-            Text("Name or Email Address",
+            Text("用戶名",
 //                color = MaterialTheme.colorScheme.primary,
 //                style = MaterialTheme.typography.labelMedium,
             ) },
@@ -175,6 +191,7 @@ fun SimpleOutlinedTextFieldSample(
         )
 
     )
+
 }
 
 //password
