@@ -1,5 +1,9 @@
 package com.example.macrocounter.screens
 
+import com.example.macrocounter.components.TableCardItem
+import com.example.macrocounter.viewModel.TableViewModel
+
+
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -40,21 +44,21 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class, com.google.accompanist.pager.ExperimentalPagerApi::class)
 @Composable
-fun SpaceListScreen(
+fun SelectTableScreen(
     vm: MainViewModel = viewModel(),
-    spaceViewModel: SpaceViewModel = viewModel(),
     onBack: () -> Unit = {},
-    onNavigateToSpaceZone: (id: String) -> Unit = {},
-    onNavigateToStudyHistory: () -> Unit = {}
+    onNavigateToOrder: (id: String) -> Unit = {},
 ) {
 
     val userViewModel = LocalUserViewModel.current
     val tableViewModel = LocalTableViewModel.current
 
+
+
     LaunchedEffect(Unit) {
 //
-        //獲取空間列表
-        userViewModel.userInfo?.token?.let { spaceViewModel.fetchSpaceList(token = it) }
+        //獲取餐桌列表
+        userViewModel.userInfo?.token?.let { tableViewModel.fetchTableList(token = it, spaceId = tableViewModel.selectedTable) }
 
     }
 
@@ -87,38 +91,23 @@ fun SpaceListScreen(
         }
 
 
-        SwipeRefresh(
-            state = rememberSwipeRefreshState(isRefreshing = spaceViewModel.refreshing ),
-            onRefresh = { coroutineScope.launch { userViewModel.userInfo?.token?.let {
-                spaceViewModel.refresh(
-                    it
-                )
-            } } }
-        ) {
             LazyColumn(state = lazyListState) {
 
-                    //文章列表
-                    items(spaceViewModel.list) { space ->
-                        SpaceItem(
-                            space,
-                            spaceViewModel.listLoaded,
-                            modifier = Modifier.clickable {
-                                onNavigateToSpaceZone(space.id)
-                                tableViewModel.selectedTable = space.id
-                            })
-                    }
+                //列表
+                items(tableViewModel.list) { table ->
+                    TableCardItem(
+                        table,
+                        tableViewModel.listLoaded,
+                        modifier = Modifier.clickable {
+                            onNavigateToOrder(table.id)
+                            tableViewModel.selectedTable = table.id
+                        })
+                }
 
             }
-        }
+
 
 
 
     }
-}
-
-
-@Preview
-@Composable
-fun SpaceListScreenPreview() {
-    SpaceListScreen()
 }

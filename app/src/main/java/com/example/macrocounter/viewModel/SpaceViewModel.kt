@@ -13,31 +13,13 @@ import kotlinx.coroutines.delay
 
 class SpaceViewModel : ViewModel() {
 
-    private val articleService = SpaceService.instance()
+    private val spaceService = SpaceService.instance()
 
-    private val pageSize = 10
+    private val pageSize = 0
     private var pageOffset = 1
 
     //文章列表数据
-    var list by mutableStateOf(
-        listOf(
-            SpaceEntity(
-                description = "",
-                id="1755522580829175808",
-                name= "stringe"
-            ),
-            SpaceEntity(
-                description = "",
-                id="1758433727353978880",
-                name= "abcd"
-            ),
-            SpaceEntity(
-                description = "",
-                id="1759438644310966272",
-                name= "pppppppppppp"
-            ),
-        )
-    )
+    var list by mutableStateOf(emptyArray<SpaceEntity>())
         private set
 
     //第一页文章列表数据是否加载完成
@@ -51,17 +33,17 @@ class SpaceViewModel : ViewModel() {
     //是否还有更多
     private var hasMore = false
 
-    suspend fun fetchArticleList() {
-        val res = articleService.list(pageOffset = pageOffset, pageSize = pageSize)
-        if (res.code == 0 && res.data != null) {
+    suspend fun fetchSpaceList(token: String) {
+        val res = spaceService.list(index = pageOffset, limit = pageSize, token = "Bearer $token")
+        if (res.items != null) {
             val tmpList = mutableListOf<SpaceEntity>()
             if (pageOffset != 1) {
                 tmpList.addAll(list)
             }
-            tmpList.addAll(res.data)
+            tmpList.addAll(res.items)
             //是否还有更多数据
-            hasMore = res.data.size == pageSize
-            list = tmpList
+            hasMore = res.items.size == pageSize
+            list = tmpList.toTypedArray()
             listLoaded = true
             refreshing = false
         } else {
@@ -76,17 +58,17 @@ class SpaceViewModel : ViewModel() {
      * 下拉刷新
      *
      */
-    suspend fun refresh() {
+    suspend fun refresh(token: String) {
         pageOffset = 1
 //        listLoaded = false
         refreshing = true
-        fetchArticleList()
+        fetchSpaceList(token = token)
     }
 
-    suspend fun loadMore() {
+    suspend fun loadMore(token: String) {
         if (hasMore) {
             pageOffset++
-            fetchArticleList()
+            fetchSpaceList(token = token)
         }
     }
 

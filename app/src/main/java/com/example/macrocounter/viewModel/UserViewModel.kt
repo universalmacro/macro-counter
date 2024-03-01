@@ -65,13 +65,10 @@ class UserViewModel(context: Context) : ViewModel() {
 //        userInfo = UserInfoEntity(token)
 //        viewModelScope.launch {
 //            userInfoManager.save(token)
-//
 //        }
 //        onClose()
         try {
-            Log.d("Login", " ${account}: ${md5(md5(password))}" )
-
-            val res = userService.signIn(UserService.AuthData(account, md5(md5(password))))
+            val res = userService.signIn(UserService.AuthData(account, sha256(sha256(password))))
             Log.d("Login==Result", " ${res}" )
 
             if (res?.token != null) {
@@ -87,14 +84,12 @@ class UserViewModel(context: Context) : ViewModel() {
         } catch (exception: Exception) {
             // handle errors
             Log.d("=====Exception", "${exception} ")
-
+            error = exception.message.toString()
         }
-
-
         loading = false
     }
 
-    fun md5(content: String): String {
+    fun sha256(content: String): String {
         val hash = MessageDigest.getInstance("SHA-256").digest(content.toByteArray())
         val hex = StringBuilder(hash.size * 2)
         for (b in hash) {

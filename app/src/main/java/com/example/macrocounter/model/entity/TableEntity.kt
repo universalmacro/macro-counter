@@ -5,12 +5,11 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-data class SpaceEntity(
-    val name: String,
+data class TableEntity(
+    val label: String,
     var id: String,
-    var description: String? = ""
 )
 
-data class SpaceListResponse(val items: List<SpaceEntity>?) : BaseResponse()
+data class TableListResponse(val items: List<TableEntity>?) : BaseResponse()
 
 //data class SpaceInfoResponse(val data: SpaceEntity?) : BaseResponse()

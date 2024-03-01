@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.macrocounter.compositionLocal.LocalTableViewModel
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
@@ -17,6 +18,8 @@ import com.example.macrocounter.compositionLocal.LocalUserViewModel
 import com.example.macrocounter.navigation.Destinations
 import com.example.macrocounter.screens.LoginScreen
 import com.example.macrocounter.screens.MainFrame
+import com.example.macrocounter.screens.SelectTableScreen
+import com.example.macrocounter.viewModel.TableViewModel
 import com.example.macrocounter.viewModel.UserViewModel
 
 
@@ -31,7 +34,7 @@ fun NavHostApp() {
     val navController = rememberAnimatedNavController()
     ProvideWindowInsets {
 
-        CompositionLocalProvider(LocalUserViewModel provides UserViewModel(LocalContext.current)) {
+        CompositionLocalProvider(LocalUserViewModel provides UserViewModel(LocalContext.current), LocalTableViewModel provides TableViewModel(LocalContext.current)) {
 
             val userViewModel = LocalUserViewModel.current
 
@@ -95,7 +98,12 @@ fun NavHostApp() {
                         slideOutOfContainer(AnimatedContentScope.SlideDirection.Right)
                     },
                 ) {
-                    MainFrame()
+                    MainFrame( onBack = {
+                        navController.popBackStack()
+                    },
+                        onNavigateToSpaceZone = {
+                            navController.navigate(Destinations.SelectTableFrame.route)
+                        })
                 }
 
                 //選桌
@@ -108,25 +116,35 @@ fun NavHostApp() {
                         slideOutOfContainer(AnimatedContentScope.SlideDirection.Right)
                     },
                 ) {
-//                    SpaceListScreen(onBack = {
-//                        navController.popBackStack()
-//                    })
+                    SelectTableScreen(
+                        onNavigateToOrder = {
+                            navController.navigate(Destinations.OrderFrame.route)
+                        },
+                        onBack = {
+                            navController.navigate(Destinations.Login.route)
+                        },
+                    )
                 }
 
-//                //视频详情页
-//                composable(
-//                    Destinations.VideoDetail.route,
-//                    enterTransition = {
-//                        slideIntoContainer(AnimatedContentScope.SlideDirection.Left)
-//                    },
-//                    exitTransition = {
-//                        slideOutOfContainer(AnimatedContentScope.SlideDirection.Right)
-//                    },
-//                ) {
-//                    VideoDetailScreen(onBack = {
-//                        navController.popBackStack()
-//                    })
-//                }
+                //點餐
+                composable(
+                    Destinations.OrderFrame.route,
+                    enterTransition = {
+                        slideIntoContainer(AnimatedContentScope.SlideDirection.Left)
+                    },
+                    exitTransition = {
+                        slideOutOfContainer(AnimatedContentScope.SlideDirection.Right)
+                    },
+                ) {
+//                    SelectTableScreen(
+//                        onNavigateToOrder = {
+//                            navController.navigate(Destinations.OrderFrame.route)
+//                        },
+//                        onBack = {
+//                            navController.navigate(Destinations.Login.route)
+//                        },
+//                    )
+                }
 
 //                composable(
 //                    Destinations.Login.route,

@@ -9,4 +9,7 @@ sealed class Destinations(val route: String) {
 
     // 選桌頁面
     object SelectTableFrame : Destinations("SelectTableFrame")
+
+    // 點餐
+    object OrderFrame : Destinations("OrderFrame")
 }

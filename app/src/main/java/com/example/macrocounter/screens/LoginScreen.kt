@@ -13,6 +13,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.Visibility
@@ -80,23 +82,42 @@ fun LoginScreen(onClose: () -> Unit){
             .background(Color.White)
             .padding(28.dp)
     ) {
-//        CompositionLocalProvider(LocalUserViewModel provides UserViewModel(LocalContext.current)) {
 
+        val showingDialog = remember { mutableStateOf(false) }
 
         val passwordVisible = remember {
             mutableStateOf(false)
         }
 
-
-//        val username = remember {
-//            mutableStateOf("")
-//        }
-//        val password = remember {
-//            mutableStateOf("")
-//        }
-
         val userViewModel = LocalUserViewModel.current
         val coroutineScope = rememberCoroutineScope()
+
+
+        if (showingDialog.value) {
+            AlertDialog(
+                onDismissRequest = {
+                    showingDialog.value = false
+                },
+
+                title = {
+                    Text(text = "${userViewModel.error}")
+                },
+
+
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showingDialog.value = false
+                        },
+                        modifier = Modifier
+                            .padding(16.dp)
+                    ) {
+                        Text("確認")
+                    }
+                },
+            )
+        }
+
 
         Column(
             modifier = Modifier
@@ -127,7 +148,14 @@ fun LoginScreen(onClose: () -> Unit){
             Button(
                 onClick = {
                     coroutineScope.launch{
+
                         userViewModel.login(onClose = onClose)
+
+                        if(userViewModel.error != ""){
+                            Log.d("=====Logingingin", "${userViewModel.error} ")
+                            showingDialog.value = true
+                        }
+
 
                     }
                 },

@@ -18,14 +18,12 @@ import com.example.macrocounter.model.entity.NavigationItem
 
 @Composable
 fun MainFrame(
-    onNavigateToArticle: () -> Unit = {},
-    onNavigateToVideo: () -> Unit = {},
-    onNavigateToSpace: () -> Unit = {}
+    onNavigateToSpaceZone: (id: String) -> Unit = {},
+    onBack: () -> Unit = {}
 ) {
 
     val navigationItems = listOf(
         NavigationItem(title = "空間", icon = Icons.Filled.Home),
-//        NavigationItem(title = "任务", icon = Icons.Filled.DateRange),
         NavigationItem(title = "設置", icon = Icons.Filled.Person),
     )
 
@@ -44,7 +42,6 @@ fun MainFrame(
                     onClick = {
                         currentNavigationIndex = index
                     },
-                    //直接考试结果页面，进入查看页面，返回直接回到列表？
                     icon = {
                         Icon(
                             imageVector = navigationItem.icon,
@@ -62,15 +59,13 @@ fun MainFrame(
     }
     ) {
         Box(modifier = Modifier.padding(it)) {
-//            when (currentNavigationIndex) {
-//                0 -> StudyScreen(
-//                    onNavigateToArticle = onNavigateToArticle,
-//                    onNavigateToVideo = onNavigateToVideo,
-//                    onNavigateToStudyHistory = onNavigateToStudyHistory
-//                )
-//                1 -> TaskScreen()
-//                2 -> MineScreen()
-//            }
+            when (currentNavigationIndex) {
+                0 -> SpaceListScreen(
+                    onBack = onBack,
+                    onNavigateToSpaceZone = onNavigateToSpaceZone,
+                )
+                1 -> SettingScreen(onBack= onBack)
+            }
         }
     }
 
