@@ -16,21 +16,21 @@ class UserInfoManager(private val context: Context) {
         private val Context.userStore: DataStore<Preferences> by preferencesDataStore("user_store")
 
         val LOGGED = booleanPreferencesKey("LOGGED")
-        val USERNAME = stringPreferencesKey("USERNAME")
+        val USERTOKEN = stringPreferencesKey("USERTOKEN")
     }
 
     val logged: Flow<Boolean> = context.userStore.data.map { it[LOGGED] ?: false }
-    val userName: Flow<String> = context.userStore.data.map { it[USERNAME] ?: "" }
+    val token: Flow<String> = context.userStore.data.map { it[USERTOKEN] ?: "" }
 
     /**
      * 存储用户信息
      *
-     * @param userName
+     * @param userToken
      */
-    suspend fun save(userName: String) {
+    suspend fun save(token: String) {
         context.userStore.edit {
-            it[LOGGED] = userName.isNotEmpty()
-            it[USERNAME] = userName
+            it[LOGGED] = token.isNotEmpty()
+            it[USERTOKEN] = token
         }
     }
 
@@ -41,7 +41,7 @@ class UserInfoManager(private val context: Context) {
     suspend fun clear() {
         context.userStore.edit {
             it[LOGGED] = false
-            it[USERNAME] = ""
+            it[USERTOKEN] = ""
         }
     }
 

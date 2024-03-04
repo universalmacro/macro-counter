@@ -13,6 +13,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.Visibility
@@ -73,30 +75,49 @@ import com.example.macrocounter.viewModel.UserViewModel
 import androidx.compose.runtime.CompositionLocalProvider
 
 @Composable
-fun LoginScreen(){
+fun LoginScreen(onClose: () -> Unit){
     Surface (
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
             .padding(28.dp)
     ) {
-        CompositionLocalProvider(LocalUserViewModel provides UserViewModel(LocalContext.current)) {
 
+        val showingDialog = remember { mutableStateOf(false) }
 
         val passwordVisible = remember {
             mutableStateOf(false)
         }
 
-
-        val username = remember {
-            mutableStateOf("")
-        }
-        val password = remember {
-            mutableStateOf("")
-        }
-
         val userViewModel = LocalUserViewModel.current
         val coroutineScope = rememberCoroutineScope()
+
+
+        if (showingDialog.value) {
+            AlertDialog(
+                onDismissRequest = {
+                    showingDialog.value = false
+                },
+
+                title = {
+                    Text(text = "${userViewModel.error}")
+                },
+
+
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showingDialog.value = false
+                        },
+                        modifier = Modifier
+                            .padding(16.dp)
+                    ) {
+                        Text("確認")
+                    }
+                },
+            )
+        }
+
 
         Column(
             modifier = Modifier
@@ -113,12 +134,12 @@ fun LoginScreen(){
 //                id = R.drawable.ic_launcher_foreground
 //            ))
             SimpleOutlinedTextFieldSample(
-                value = username.value,
-                onValueChange = { username.value = it })
+                value = userViewModel.account,
+                onValueChange = { userViewModel.account = it })
             Spacer(modifier = Modifier.height(20.dp))
             SimpleOutlinedPasswordTextField(
-                value = password.value,
-                onValueChange = { password.value = it })
+                value = userViewModel.password,
+                onValueChange = { userViewModel.password = it })
 //            PasswordTextField(labelValue = stringResource(id = R.string.passord), painterResource = painterResource(
 //                id = R.drawable.ic_launcher_foreground
 //            ))
@@ -126,10 +147,15 @@ fun LoginScreen(){
 
             Button(
                 onClick = {
-                    Log.d("LoginPage", " ${username.value} + : ${password.value}")
+                    coroutineScope.launch{
 
-                    coroutineScope.launch {
-                        userViewModel.login()
+                        userViewModel.login(onClose = onClose)
+
+                        if(userViewModel.error != ""){
+                            Log.d("=====Logingingin", "${userViewModel.error} ")
+                            showingDialog.value = true
+                        }
+
 
                     }
                 },
@@ -142,16 +168,16 @@ fun LoginScreen(){
                 )
             }
         }
-    }
+//    }
     }
 }
 
-
-@Preview
-@Composable
-fun LoginScreenPreview(){
-    LoginScreen()
-}
+//
+//@Preview
+//@Composable
+//fun LoginScreenPreview(){
+//    LoginScreen()
+//}
 
 
 
