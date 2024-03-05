@@ -4,11 +4,15 @@ import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
@@ -30,8 +34,10 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.example.macrocounter.extension.OnBottomReached
 import com.example.macrocounter.components.SpaceItem
+import com.example.macrocounter.compositionLocal.LocalSpaceViewModel
 import com.example.macrocounter.compositionLocal.LocalTableViewModel
 import com.example.macrocounter.compositionLocal.LocalUserViewModel
+import com.example.macrocounter.model.entity.SpaceEntity
 import com.example.macrocounter.viewModel.SpaceViewModel
 import com.example.macrocounter.viewModel.MainViewModel
 import com.example.macrocounter.viewModel.UserViewModel
@@ -42,13 +48,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun SpaceListScreen(
     vm: MainViewModel = viewModel(),
-    spaceViewModel: SpaceViewModel = viewModel(),
     onBack: () -> Unit = {},
     onNavigateToSpaceZone: (id: String) -> Unit = {},
     onNavigateToStudyHistory: () -> Unit = {}
 ) {
 
     val userViewModel = LocalUserViewModel.current
+    val spaceViewModel = LocalSpaceViewModel.current
     val tableViewModel = LocalTableViewModel.current
 
     LaunchedEffect(Unit) {
@@ -67,27 +73,57 @@ fun SpaceListScreen(
 
     Column(modifier = Modifier) {
 
-        Row (
-            modifier = Modifier,
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(20.dp),
             verticalAlignment = Alignment.CenterVertically,
-        ){
-            IconButton(onClick = {
-                coroutineScope.launch {
-                    userViewModel.clear()
-                    onBack()
-                }
-            }) {
-                Icon(Icons.Filled.ExitToApp, null)
-            }
-            Text(
-                "登出",
-                textAlign = TextAlign.Center,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
 
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ){
+                IconButton(onClick = {
+                    coroutineScope.launch {
+//                        tableViewModel.selectedTable = null
+                        onBack()
+                    }
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = "返回",
+                    )
+                }
+            }
+
+
+            Text(
+                "選擇 SPACE",
+                textAlign = TextAlign.Center,
+                fontSize = 18.sp,
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End,
+            ) {
+                IconButton(onClick = {
+                    coroutineScope.launch {
+                        userViewModel.clear()
+                        onBack()
+                    }
+                }) {
+                    Icon(Icons.Filled.ExitToApp, null)
+                }
+                Text(
+                    "登出",
+                    textAlign = TextAlign.Center,
                 )
+            }
+
         }
 
-
         SwipeRefresh(
+            modifier = Modifier.padding(20.dp, 0.dp),
             state = rememberSwipeRefreshState(isRefreshing = spaceViewModel.refreshing ),
             onRefresh = { coroutineScope.launch { userViewModel.userInfo?.token?.let {
                 spaceViewModel.refresh(
@@ -95,26 +131,32 @@ fun SpaceListScreen(
                 )
             } } }
         ) {
-            LazyColumn(state = lazyListState) {
-
-                    //文章列表
-                    items(spaceViewModel.list) { space ->
-                        SpaceItem(
-                            space,
-                            spaceViewModel.listLoaded,
-                            modifier = Modifier.clickable {
-                                onNavigateToSpaceZone(space.id)
-                                tableViewModel.selectedTable = space.id
-                            })
-                    }
-
+//            LazyColumn(state = lazyListState) {
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 250.dp)
+            ){
+                //文章列表
+                items(spaceViewModel.list) { space ->
+                    SpaceItem(
+                        space,
+                        spaceViewModel.listLoaded,
+                        modifier = Modifier.clickable {
+                            onNavigateToSpaceZone(space.id)
+                            spaceViewModel.selectedSpace = SpaceEntity(id=space.id, name=space.name, description=space.description)
+                        })
+                }
             }
-        }
 
+
+        }
 
 
     }
 }
+
+
+
+
 
 
 @Preview

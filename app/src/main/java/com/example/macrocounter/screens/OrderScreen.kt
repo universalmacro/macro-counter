@@ -1,8 +1,6 @@
 package com.example.macrocounter.screens
 
 import com.example.macrocounter.components.TableCardItem
-import com.example.macrocounter.viewModel.TableViewModel
-
 
 import android.util.Log
 import androidx.compose.foundation.clickable
@@ -33,14 +31,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.macrocounter.components.FoodCardItem
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.example.macrocounter.extension.OnBottomReached
 import com.example.macrocounter.components.SpaceItem
+import com.example.macrocounter.compositionLocal.LocalFoodViewModel
 import com.example.macrocounter.compositionLocal.LocalSpaceViewModel
 import com.example.macrocounter.compositionLocal.LocalTableViewModel
 import com.example.macrocounter.compositionLocal.LocalUserViewModel
+import com.example.macrocounter.model.entity.FoodEntity
 import com.example.macrocounter.model.entity.TableEntity
 import com.example.macrocounter.viewModel.SpaceViewModel
 import com.example.macrocounter.viewModel.MainViewModel
@@ -50,7 +51,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class, com.google.accompanist.pager.ExperimentalPagerApi::class)
 @Composable
-fun SelectTableScreen(
+fun OrderScreen(
     vm: MainViewModel = viewModel(),
     onBack: () -> Unit = {},
     onLogout: () -> Unit = {},
@@ -60,13 +61,18 @@ fun SelectTableScreen(
     val userViewModel = LocalUserViewModel.current
     val spaceViewModel = LocalSpaceViewModel.current
     val tableViewModel = LocalTableViewModel.current
+    val foodViewModel = LocalFoodViewModel.current
+
 
 
 
     LaunchedEffect(Unit) {
-//
-        //獲取餐桌列表
-        userViewModel.userInfo?.token?.let { spaceViewModel.selectedSpace?.let { it1 -> tableViewModel.fetchTableList(token = it, spaceId = it1.id) } }
+
+//        //獲取分類
+//        userViewModel.userInfo?.token?.let { spaceViewModel.selectedSpace?.let { it1 -> categoryViewModel.fetchFoodList(token = it, spaceId = it1.id) } }
+
+        //獲取餐品
+        userViewModel.userInfo?.token?.let { spaceViewModel.selectedSpace?.let { it1 -> foodViewModel.fetchFoodList(token = it, spaceId = it1.id) } }
 
     }
 
@@ -91,7 +97,6 @@ fun SelectTableScreen(
             ){
                 IconButton(onClick = {
                     coroutineScope.launch {
-                        spaceViewModel.selectedSpace = null
                         onBack()
                     }
                 }) {
@@ -104,7 +109,7 @@ fun SelectTableScreen(
 
 
             Text(
-                "SPACE:${spaceViewModel.selectedSpace?.name} 選擇餐桌",
+                "${spaceViewModel.selectedSpace?.name}:${tableViewModel.selectedTable?.label} 点餐",
                 textAlign = TextAlign.Center,
                 fontSize = 18.sp,
             )
@@ -129,24 +134,68 @@ fun SelectTableScreen(
 
         }
 
-//            LazyColumn(state = lazyListState) {
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 200.dp)
-                ){
-                //列表
-                items(tableViewModel.list) { table ->
-                    TableCardItem(
-                        table,
-                        tableViewModel.listLoaded,
-                        modifier = Modifier.clickable {
-                            onNavigateToOrder(table.id)
-                            tableViewModel.selectedTable = TableEntity(id=table.id, label=table.label)
-                        })
+        if(foodViewModel.categories.size > 0) {
+            TabRow(
+                selectedTabIndex = vm.categoryIndex,
+                backgroundColor = Color(0x22149EE7),
+                contentColor = Color(0xFF149EE7),
+            ) {
+                foodViewModel.categories.forEachIndexed { index, category ->
+                    Tab(
+                        selected = vm.categoryIndex == index,
+                        onClick = {
+                            vm.updateCategoryIndex(index)
+                        },
+                        selectedContentColor = Color(0xFF149EE7),
+                        unselectedContentColor = Color(0xFF666666),
+                    ) {
+                        Text(
+                            text = category,
+                            modifier = Modifier
+                                .padding(vertical = 8.dp),
+//                            .placeholder(visible = !vm.categoryLoaded, color = Color.LightGray),
+                            fontSize = 14.sp
+                        )
+                    }
                 }
-
             }
 
+//            LazyColumn(state = lazyListState) {
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 200.dp)
+            ){
+                if(foodViewModel.categories.size > 0) {
+                    val list = foodViewModel.listWithCategory[foodViewModel.categories[vm.categoryIndex]]?: emptyList()
 
+
+                    //列表
+                    items(list) { food ->
+                        FoodCardItem(
+                            food,
+                            tableViewModel.listLoaded,
+                            modifier = Modifier.clickable {
+//                        onNavigateToOrder(table.id)
+//                        tableViewModel.selectedTable = TableEntity(id=table.id, label=table.label)
+                            })
+                    }
+                }
+
+
+
+//            //列表
+//            items(foodViewModel.list) { food ->
+//                FoodCardItem(
+//                    food,
+//                    tableViewModel.listLoaded,
+//                    modifier = Modifier.clickable {
+////                        onNavigateToOrder(table.id)
+////                        tableViewModel.selectedTable = TableEntity(id=table.id, label=table.label)
+//                    })
+//            }
+
+            }
+        }
+        //分类标签
 
 
     }

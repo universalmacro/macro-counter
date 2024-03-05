@@ -9,6 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.macrocounter.compositionLocal.LocalFoodViewModel
+import com.example.macrocounter.compositionLocal.LocalSpaceViewModel
 import com.example.macrocounter.compositionLocal.LocalTableViewModel
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -18,7 +20,10 @@ import com.example.macrocounter.compositionLocal.LocalUserViewModel
 import com.example.macrocounter.navigation.Destinations
 import com.example.macrocounter.screens.LoginScreen
 import com.example.macrocounter.screens.MainFrame
+import com.example.macrocounter.screens.OrderScreen
 import com.example.macrocounter.screens.SelectTableScreen
+import com.example.macrocounter.viewModel.FoodViewModel
+import com.example.macrocounter.viewModel.SpaceViewModel
 import com.example.macrocounter.viewModel.TableViewModel
 import com.example.macrocounter.viewModel.UserViewModel
 
@@ -34,16 +39,19 @@ fun NavHostApp() {
     val navController = rememberAnimatedNavController()
     ProvideWindowInsets {
 
-        CompositionLocalProvider(LocalUserViewModel provides UserViewModel(LocalContext.current), LocalTableViewModel provides TableViewModel(LocalContext.current)) {
+        CompositionLocalProvider(
+            LocalUserViewModel provides UserViewModel(LocalContext.current),
+            LocalSpaceViewModel provides SpaceViewModel(LocalContext.current),
+            LocalTableViewModel provides TableViewModel(LocalContext.current),
+            LocalFoodViewModel provides FoodViewModel(LocalContext.current)
+        ) {
 
             val userViewModel = LocalUserViewModel.current
 
             AnimatedNavHost(
                 navController = navController,
-//                startDestination = Destinations.HomeFrame.route
                 startDestination = Destinations.Login.route
             ) {
-
 
                 composable(
                     Destinations.Login.route,
@@ -60,7 +68,6 @@ fun NavHostApp() {
                 ) {
                     LoginScreen {
                         //已登录
-//                        navController.popBackStack()
                         navController.navigate(Destinations.HomeFrame.route)
                     }
 //                    if (userViewModel.logged) {
@@ -88,7 +95,7 @@ fun NavHostApp() {
                 }
 
 
-                // SpaceList
+                // 登錄後進入主頁，可以選擇 Space， 配置 Settings
                 composable(
                     Destinations.HomeFrame.route,
                     enterTransition = {
@@ -98,12 +105,19 @@ fun NavHostApp() {
                         slideOutOfContainer(AnimatedContentScope.SlideDirection.Right)
                     },
                 ) {
-                    MainFrame( onBack = {
-                        navController.popBackStack()
-                    },
-                        onNavigateToSpaceZone = {
-                            navController.navigate(Destinations.SelectTableFrame.route)
-                        })
+
+                     if (userViewModel.logged) {
+                         MainFrame( onBack = {
+                             navController.popBackStack()
+                         },
+                             onNavigateToSpaceZone = {
+                                 navController.navigate(Destinations.SelectTableFrame.route)
+                             })
+                     }else{
+                         //未登录
+                        navController.navigate(Destinations.Login.route)
+                     }
+
                 }
 
                 //選桌
@@ -120,7 +134,8 @@ fun NavHostApp() {
                         onNavigateToOrder = {
                             navController.navigate(Destinations.OrderFrame.route)
                         },
-                        onBack = {
+                        onBack = {navController.popBackStack()},
+                        onLogout = {
                             navController.navigate(Destinations.Login.route)
                         },
                     )
@@ -136,30 +151,13 @@ fun NavHostApp() {
                         slideOutOfContainer(AnimatedContentScope.SlideDirection.Right)
                     },
                 ) {
-//                    SelectTableScreen(
-//                        onNavigateToOrder = {
-//                            navController.navigate(Destinations.OrderFrame.route)
-//                        },
-//                        onBack = {
-//                            navController.navigate(Destinations.Login.route)
-//                        },
-//                    )
+                    OrderScreen(
+                        onBack = {navController.popBackStack()},
+                        onLogout = {
+                            navController.navigate(Destinations.Login.route)
+                        },
+                    )
                 }
-
-//                composable(
-//                    Destinations.Login.route,
-//                    enterTransition = {
-//                        slideIntoContainer(AnimatedContentScope.SlideDirection.Left)
-//                    },
-//                    exitTransition = {
-//                        slideOutOfContainer(AnimatedContentScope.SlideDirection.Right)
-//                    },
-//                ) {
-//                    LoginScreen()
-////                    LoginScreen {
-////                        navController.popBackStack()
-////                    }
-//                }
 
             }
         }

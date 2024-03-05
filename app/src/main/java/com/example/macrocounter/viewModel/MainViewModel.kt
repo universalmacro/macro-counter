@@ -8,11 +8,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.macrocounter.model.entity.Category
-import com.example.macrocounter.model.service.HomeService
+import com.example.macrocounter.model.service.CategoryService
+import com.example.macrocounter.model.service.FoodService
 
 class MainViewModel : ViewModel() {
 
-    private val homeService = HomeService.instance()
+    private val categoryService = CategoryService.instance()
 
     //分类数据是否加载成功
     var categoryLoaded by mutableStateOf(false)
@@ -28,16 +29,16 @@ class MainViewModel : ViewModel() {
     )
         private set
 
-    suspend fun categoryData() {
-        val categoryRes = homeService.category()
-        if (categoryRes.code == 0) {
-            categories = categoryRes.data
-            categoryLoaded = true
-        } else {
-            //不成功的情况下，读取 message
-            val message = categoryRes.message
-        }
-    }
+//    suspend fun categoryData() {
+//        val categoryRes = categoryService.category()
+//        if (categoryRes.code == 0) {
+//            categories = categoryRes.data
+//            categoryLoaded = true
+//        } else {
+//            //不成功的情况下，读取 message
+//            val message = categoryRes.message
+//        }
+//    }
 
     //当前分类下标
     var categoryIndex by mutableStateOf(0)
@@ -72,10 +73,6 @@ class MainViewModel : ViewModel() {
     }
 
 
-
-    //通知数据
-    val notifications =
-        listOf("人社部向疫情防控期", "湖北黄冈新冠肺炎患者治愈病例破千连续5治愈病例破千连续5", "安徽单日新增确诊病例首次降至个位数累计")
 
 
 }
