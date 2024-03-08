@@ -23,8 +23,7 @@ class TableViewModel(context: Context) : ViewModel() {
     var listLoaded by mutableStateOf(false)
         private set
 
-    //是否正在刷新
-    var selectedTable by mutableStateOf("")
+    var selectedTable: TableEntity? by mutableStateOf(null)
 
     //是否还有更多
     private var hasMore = false

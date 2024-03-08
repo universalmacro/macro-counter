@@ -1,6 +1,7 @@
 package com.example.macrocounter.viewModel
 
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -11,7 +12,7 @@ import com.example.macrocounter.model.entity.SpaceEntity
 import com.example.macrocounter.model.service.SpaceService
 import kotlinx.coroutines.delay
 
-class SpaceViewModel : ViewModel() {
+class SpaceViewModel(context: Context) : ViewModel() {
 
     private val spaceService = SpaceService.instance()
 
@@ -32,6 +33,9 @@ class SpaceViewModel : ViewModel() {
 
     //是否还有更多
     private var hasMore = false
+
+    var selectedSpace: SpaceEntity? by mutableStateOf(null)
+
 
     suspend fun fetchSpaceList(token: String) {
         val res = spaceService.list(index = pageOffset, limit = pageSize, token = "Bearer $token")

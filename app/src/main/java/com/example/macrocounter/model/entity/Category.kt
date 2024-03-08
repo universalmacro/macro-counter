@@ -15,5 +15,5 @@ data class Category(
  *
  * @property data
  */
-data class CategoryResponse(var data: List<Category>) : BaseResponse() {}
+data class CategoryResponse(var data: List<String>) : BaseResponse() {}
 
