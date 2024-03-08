@@ -22,6 +22,7 @@ import com.example.macrocounter.screens.LoginScreen
 import com.example.macrocounter.screens.MainFrame
 import com.example.macrocounter.screens.OrderScreen
 import com.example.macrocounter.screens.SelectTableScreen
+import com.example.macrocounter.viewModel.AttributeViewModel
 import com.example.macrocounter.viewModel.FoodViewModel
 import com.example.macrocounter.viewModel.SpaceViewModel
 import com.example.macrocounter.viewModel.TableViewModel
@@ -156,6 +157,7 @@ fun NavHostApp() {
                         onLogout = {
                             navController.navigate(Destinations.Login.route)
                         },
+                        attributeViewModel = AttributeViewModel()
                     )
                 }
 
