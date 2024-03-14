@@ -49,11 +49,16 @@ class FoodViewModel(context: Context) : ViewModel() {
 
             //是否还有更多数据
             list = tmpList.toTypedArray()
-            categories = category.toTypedArray()
+            if(category == null){
+                categories = emptyList<String>().toTypedArray()
+            }else{
+                categories = category.toTypedArray()
+
+            }
             listLoaded = true
 
             for (value in category) {
-                listWithCategory[value] = list.filter{it.categories[0] == value}
+                listWithCategory[value] = list.filter{ it.categories!![0] == value}
             }
 
         }

@@ -27,7 +27,7 @@ data class FoodEntity(
     val image: String,
     val price: Int,
     val fixedOffset: Int?,
-    val categories: List<String>,
+    val categories: List<String>?,
     val attributes: List<Attribute>,
 )
 

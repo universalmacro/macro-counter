@@ -12,7 +12,7 @@ interface CategoryService {
     suspend fun list(
         @Header("Authorization")token: String,
         @Path("spaceId") spaceId: String,
-    ): List<String>
+    ): List<String>?
 
 
     companion object {

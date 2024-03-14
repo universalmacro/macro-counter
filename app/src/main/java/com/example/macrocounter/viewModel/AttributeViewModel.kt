@@ -1,6 +1,5 @@
 package com.example.macrocounter.viewModel
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -9,8 +8,6 @@ import androidx.lifecycle.ViewModel
 import com.example.macrocounter.model.entity.CartItemEntity
 import com.example.macrocounter.model.entity.CartItemForViewEntity
 import com.example.macrocounter.model.entity.FoodEntity
-import androidx.compose.runtime.getValue
-import com.example.macrocounter.model.service.CategoryService
 import com.example.macrocounter.model.service.OrderService
 
 class AttributeViewModel : ViewModel() {
@@ -22,7 +19,10 @@ class AttributeViewModel : ViewModel() {
 
     var selectedfood by mutableStateOf<FoodEntity?>(null)
 
-    var shoppingCart by mutableStateOf(emptyArray<CartItemForViewEntity>())
+//    var shoppingCart by mutableStateOf(emptyArray<CartItemForViewEntity>())
+//        private set
+
+    var shoppingCart = mutableStateListOf<CartItemForViewEntity>()
         private set
 
 //        var shoppingCart by mutableListOf<CartItemForViewEntity>()
@@ -67,17 +67,17 @@ class AttributeViewModel : ViewModel() {
 
     }
 
-    fun decreaseItem(item: CartItemForViewEntity){
-        shoppingCart.forEach { e-> if (e.food.id == item.food.id){
-            if(e.quantity > 1){
-                e.quantity -= 1
+    fun decreaseItem(i: Int){
+        if(shoppingCart[i].quantity > 1){
+            shoppingCart[i] = shoppingCart[i].copy(quantity = shoppingCart[i].quantity-1)
 
-            }else{
-                //remove
-            }
-
-            }
+        }else{
+            shoppingCart.removeAt(i)
         }
+    }
+
+    fun addItem(i: Int){
+        shoppingCart[i] = shoppingCart[i].copy(quantity = shoppingCart[i].quantity+1)
     }
 
     fun removeItem(item: CartItemForViewEntity){
@@ -97,7 +97,7 @@ class AttributeViewModel : ViewModel() {
         val tmpList = mutableListOf<CartItemEntity>()
 
         shoppingCart.forEach {
-            for (i in 0..it.quantity) {
+            for (i in 1..it.quantity) {
                 tmpList.add(CartItemEntity(food = it.food, spec = it.spec))
             }
         }
@@ -110,7 +110,29 @@ class AttributeViewModel : ViewModel() {
 
 
         }
-        shoppingCart = emptyArray()
+//        shoppingCart = emptyArray()
+        shoppingCart.clear()
     }
+
+
+    suspend fun addToOrder(token: String, orderId: String) {
+        val tmpList = mutableListOf<CartItemEntity>()
+
+        shoppingCart.forEach {
+            for (i in 1..it.quantity) {
+                tmpList.add(CartItemEntity(food = it.food, spec = it.spec))
+            }
+        }
+        val addOrderRequest = OrderService.OrderRequest(foods = tmpList)
+        orderService.addOrder(token = "Bearer $token", orderId = orderId, addOrderRequest = addOrderRequest)
+//        if (res != null) {
+//            Log.d("====ADD to ORDER", "ADD to ORDER SUCCESS")
+//        }
+//        shoppingCart = emptyArray()
+        shoppingCart.clear()
+
+    }
+
+
 }
 

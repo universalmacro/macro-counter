@@ -4,6 +4,7 @@ import com.example.macrocounter.components.TableCardItem
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,6 +13,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -26,6 +28,7 @@ import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TextDecrease
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -33,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -93,7 +97,7 @@ fun OrderScreen(
 //        userViewModel.userInfo?.token?.let { spaceViewModel.selectedSpace?.let { it1 -> categoryViewModel.fetchFoodList(token = it, spaceId = it1.id) } }
 
         //獲取餐品
-        userViewModel.userInfo?.token?.let { spaceViewModel.selectedSpace?.let { it1 -> foodViewModel.fetchFoodList(token = it, spaceId = it1.id) } }
+//        userViewModel.userInfo?.token?.let { spaceViewModel.selectedSpace?.let { it1 -> foodViewModel.fetchFoodList(token = it, spaceId = it1.id) } }
 
     }
 
@@ -131,7 +135,8 @@ fun OrderScreen(
 
 
             Text(
-                "${spaceViewModel.selectedSpace?.name}:${tableViewModel.selectedTable?.label} 点餐",
+                "${spaceViewModel.selectedSpace?.name}:${tableViewModel.selectedTable?.label} " +
+                        if(tableViewModel.selectedOrder==null)"点餐" else "加餐",
                 textAlign = TextAlign.Center,
                 fontSize = 18.sp,
             )
@@ -160,37 +165,83 @@ fun OrderScreen(
 
             Column (
                 modifier = Modifier
-                    .width(300.dp).fillMaxSize()
+                    .width(300.dp)
+                    .fillMaxSize()
                     .padding(10.dp)
-                    .verticalScroll(rememberScrollState())
-                    .border(2.dp, Color.Red, RoundedCornerShape(10.dp)),
+//                    .verticalScroll(rememberScrollState())
+                    .background(color = Color(0xFFF5F5F5))
+//                    .border(2.dp, Color.Red, RoundedCornerShape(10.dp)),
             ){
-                attributeViewModel.shoppingCart.forEachIndexed { i, e ->
-                    CartItem(
-                        item = e,
-                        decreaseItemCount = {
-                            attributeViewModel.decreaseItem(e)
-                        },
-                        increaseItemCount = {
-                            var item = CartItemEntity(food=e.food, spec = e.spec)
-                            attributeViewModel.addToCart(item)
-                        },
-                        onItemClick={
-                            null
-                        },
-                        removeItem = {
-                            null
+
+                LazyColumn(
+
+                ){
+
+//                    attributeViewModel.shoppingCart.forEachIndexed { i, e ->
+
+                        itemsIndexed(attributeViewModel.shoppingCart){ i, e ->
+                            CartItem(
+                                item = e,
+                                decreaseItemCount = {
+                                    attributeViewModel.decreaseItem(i)
+                                },
+                                increaseItemCount = {
+                                    Log.d("increaseItemCount",
+                                        attributeViewModel.shoppingCart[i].quantity.toString()
+                                    )
+                                    attributeViewModel.addItem(i)
+//                            var item = CartItemEntity(food=e.food, spec = e.spec)
+//                            attributeViewModel.addToCart(item)
+                                },
+                                onItemClick={
+                                    null
+                                },
+                                removeItem = {
+                                    null
+                                }
+                            )
                         }
-                    )
+
 //
+//                    }
                 }
 
-                Button(onClick = {
-                    coroutineScope.launch{
-                        userViewModel.userInfo?.let { spaceViewModel.selectedSpace?.let { it1 -> tableViewModel.selectedTable?.let { it2 -> attributeViewModel.createTableOrder(token = it.token, spaceId = it1.id, table = it2.id) } } }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                ){
+                    FilledTonalButton(
+                        shape = RoundedCornerShape(5.dp),
+                        enabled = tableViewModel.selectedTable!= null,
+                        onClick = {
+                            // 判斷是點餐還是加餐
+                            coroutineScope.launch{
+                                if(tableViewModel.selectedOrder == null) {
+
+                                    userViewModel.userInfo?.let {
+                                        spaceViewModel.selectedSpace?.let { it1 ->
+                                            tableViewModel.selectedTable?.let { it2 ->
+                                                attributeViewModel.createTableOrder(
+                                                    token = it.token,
+                                                    spaceId = it1.id,
+                                                    table = it2.id
+                                                )
+                                            }
+                                        }
+                                    }
+                                }else{
+                                    userViewModel.userInfo?.token?.let { attributeViewModel.addToOrder(token = it, orderId = tableViewModel.selectedOrder!!.id) }
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(0.9F)
+                    ) {
+                        Text(
+                            text = "提交",
+                            textAlign = TextAlign.Center,
+                        )
                     }
-                }) {
-                    Text(text = "提交")
                 }
 
             }
@@ -280,15 +331,20 @@ fun OrderScreen(
 fun CartItem(
     item: CartItemForViewEntity,
     removeItem: (String) -> Unit,
-    increaseItemCount: (String) -> Unit,
-    decreaseItemCount: (String) -> Unit,
+    increaseItemCount: () -> Unit,
+    decreaseItemCount: () -> Unit,
     onItemClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
-    Row {
+    Row (modifier = Modifier
+        .fillMaxWidth()
+        .padding(10.dp)
+        .background(color = Color.White)){
         Column (
-            modifier = Modifier.fillMaxHeight().padding(20.dp),
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(20.dp),
         ){
             Image(
                 painter = if(item.food.image != null && item.food.image != "") rememberAsyncImagePainter("${item.food.image}?imageView2/1/w/268/q/85") else rememberAsyncImagePainter("https://ordering-1318552943.cos.ap-hongkong.myqcloud.com/static/default.png?imageView2/1/w/268/q/85"),
@@ -301,7 +357,9 @@ fun CartItem(
 
 
         Column (
-            modifier = Modifier.fillMaxHeight().padding(0.dp, 10.dp),
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(0.dp, 10.dp),
             verticalArrangement = Arrangement.SpaceBetween,
         ){
             Text(
@@ -320,28 +378,22 @@ fun CartItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End,
             ) {
-                IconButton(onClick = {  },
-                    modifier = Modifier
-                        .then(Modifier.size(24.dp))
-                        .border(1.dp, Color.Cyan, shape = CircleShape)
-                ) {
-                    Icon(Icons.Default.TextDecrease, contentDescription = "content description", tint = Color.Cyan,
-                        modifier = Modifier
-                        .fillMaxSize())
-                }
+//                IconButton(onClick = {  },
+//                    modifier = Modifier
+//                        .then(Modifier.size(24.dp))
+//                        .border(1.dp, Color.Cyan, shape = CircleShape)
+//                ) {
+//                    Icon(Icons.Default.TextDecrease, contentDescription = "content description", tint = Color.Cyan,
+//                        modifier = Modifier
+//                        .fillMaxSize())
+//                }
+
+                RoundedButton(onClick = decreaseItemCount, modifier = Modifier, imageVector = Icons.Default.ArrowBack)
                 Text(
                     "${item.quantity}",
                     textAlign = TextAlign.Center,
                 )
-                IconButton(onClick = {  },
-                    modifier = Modifier
-                        .then(Modifier.size(24.dp))
-                        .border(1.dp, Color.Cyan, shape = CircleShape)
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "content description", tint = Color.Cyan,
-                        modifier = Modifier
-                            .fillMaxSize())
-                }
+                RoundedButton(onClick = increaseItemCount, modifier = Modifier, imageVector = Icons.Default.Add)
             }
 
         }
@@ -349,9 +401,25 @@ fun CartItem(
 
     }
 
-//    QuantitySelector(
-//        onValueDecreaseClick = decreaseItemCount(item.food.id),
-//        onValueIncreaseClick = increaseItemCount(item.food.id),
-//
-//    )
+}
+
+
+@Composable
+fun RoundedButton(modifier: Modifier, onClick: () -> Unit, imageVector: ImageVector) {
+    Box(modifier = modifier.padding(horizontal = 10.dp)) {
+        Button(
+            onClick = onClick,
+            shape = CircleShape,
+            modifier = modifier.size(20.dp),
+            contentPadding = PaddingValues(1.dp)
+        ) {
+            // Inner content including an icon and a text label
+            Icon(
+                imageVector = imageVector,
+                contentDescription = "Favorite",
+                modifier = Modifier.size(10.dp)
+            )
+        }
+
+    }
 }

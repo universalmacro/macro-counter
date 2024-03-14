@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,7 +43,7 @@ fun AttributePopup(
 ) {
 
     var selectedAttribute = remember { mutableMapOf<String, Option>() }
-    var total = remember{ mutableStateOf (0) }
+    var total = remember{ mutableStateOf (food.price) }
 
     Dialog(
         onDismissRequest = {
@@ -57,7 +58,7 @@ fun AttributePopup(
             elevation = 5.dp,
             shape = RoundedCornerShape(15.dp),
             modifier = Modifier
-                .fillMaxWidth(0.60f)
+                .fillMaxWidth(0.50f)
                 .border(2.dp, color = Color(0xFF666666), shape = RoundedCornerShape(15.dp))
         ){
             Column(
@@ -131,28 +132,28 @@ fun AttributePopup(
                     horizontalArrangement = Arrangement.spacedBy(50.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ){
-                    Button(
-                        onClick = {
-                            onDismiss()
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = Color(0xFF149EE7),
-                            contentColor = Color.White
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                        ,
-                        shape = CircleShape
-                    ) {
-                        Text(
-                            text = "取消",
-                            style = MaterialTheme.typography.h6,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                    Button(
+//                    Button(
+//                        onClick = {
+//                            onDismiss()
+//                        },
+//                        colors = ButtonDefaults.buttonColors(
+//                            backgroundColor = Color(0xFF149EE7),
+//                            contentColor = Color.White
+//                        ),
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .weight(1f)
+//                        ,
+//                        shape = CircleShape
+//                    ) {
+//                        Text(
+//                            text = "取消",
+//                            style = MaterialTheme.typography.h6,
+//                            fontWeight = FontWeight.Bold,
+//                            textAlign = TextAlign.Center,
+//                        )
+//                    }
+                    FilledTonalButton(
                         onClick = {
                             val specList = mutableListOf<Spec>()
 
@@ -165,19 +166,19 @@ fun AttributePopup(
 
                             onDismiss()
                         },
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = Color.White,
-                            contentColor = Color.DarkGray
-                        ),
+//                        colors = ButtonDefaults.buttonColors(
+//                            backgroundColor = Color(0x22149EE7),
+////                            contentColor = Color(0xFF666666),
+//                        ),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .weight(1f),
-                        shape = CircleShape
+//                            .weight(1f),
+//                        shape = CircleShape
                     ) {
                         Text(
-                            text = "確認",
-                            style = MaterialTheme.typography.h6,
-                            fontWeight = FontWeight.Bold,
+                            text = "加入購物車",
+//                            style = MaterialTheme.typography.h6,
+//                            fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
                         )
                     }
