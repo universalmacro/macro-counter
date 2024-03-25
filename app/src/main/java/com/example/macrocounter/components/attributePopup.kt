@@ -132,27 +132,6 @@ fun AttributePopup(
                     horizontalArrangement = Arrangement.spacedBy(50.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ){
-//                    Button(
-//                        onClick = {
-//                            onDismiss()
-//                        },
-//                        colors = ButtonDefaults.buttonColors(
-//                            backgroundColor = Color(0xFF149EE7),
-//                            contentColor = Color.White
-//                        ),
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .weight(1f)
-//                        ,
-//                        shape = CircleShape
-//                    ) {
-//                        Text(
-//                            text = "取消",
-//                            style = MaterialTheme.typography.h6,
-//                            fontWeight = FontWeight.Bold,
-//                            textAlign = TextAlign.Center,
-//                        )
-//                    }
                     FilledTonalButton(
                         onClick = {
                             val specList = mutableListOf<Spec>()
@@ -172,8 +151,6 @@ fun AttributePopup(
 //                        ),
                         modifier = Modifier
                             .fillMaxWidth()
-//                            .weight(1f),
-//                        shape = CircleShape
                     ) {
                         Text(
                             text = "加入購物車",
