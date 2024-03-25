@@ -45,7 +45,6 @@ import com.example.macrocounter.screens.CartItem
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun OrderPopup(
-//    food: FoodEntity,
     onDismiss:()->Unit,
     onConfirm:()->Unit,
     onNavigateToOrder: (id: String)->Unit,
@@ -215,17 +214,9 @@ fun CartItemForOrder(
                         Text("刪除", color = Color.Red)
                     }
 
-
-
-
             }
 
-
-
         }
-
-
-
     }
 
     Divider()

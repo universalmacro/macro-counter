@@ -37,25 +37,46 @@ class SpaceViewModel(context: Context) : ViewModel() {
     var selectedSpace: SpaceEntity? by mutableStateOf(null)
 
 
+    var error by mutableStateOf("")
+        private set
+
+
+
     suspend fun fetchSpaceList(token: String) {
-        val res = spaceService.list(index = pageOffset, limit = pageSize, token = "Bearer $token")
-        if (res.items != null) {
-            val tmpList = mutableListOf<SpaceEntity>()
-            if (pageOffset != 1) {
-                tmpList.addAll(list)
+        try{
+            val res = spaceService.list(index = pageOffset, limit = pageSize, token = "Bearer $token")
+
+            if(res.isSuccessful){
+                if (res.body()?.items != null) {
+                    val tmpList = mutableListOf<SpaceEntity>()
+                    if (pageOffset != 1) {
+                        tmpList.addAll(list)
+                    }
+                    tmpList.addAll(res.body()?.items!!)
+                    //是否还有更多数据
+                    hasMore = res.body()?.items!!.size == pageSize
+                    list = tmpList.toTypedArray()
+                    listLoaded = true
+                    refreshing = false
+                } else {
+                    pageOffset--
+                    if (pageOffset <= 1) {
+                        pageOffset = 1
+                    }
+                }
+            }else{
+                Log.d("=====Exception=====", "nooooooooooooooo ")
+
             }
-            tmpList.addAll(res.items)
-            //是否还有更多数据
-            hasMore = res.items.size == pageSize
-            list = tmpList.toTypedArray()
-            listLoaded = true
-            refreshing = false
-        } else {
-            pageOffset--
-            if (pageOffset <= 1) {
-                pageOffset = 1
-            }
+        }catch (exception: Exception) {
+            // handle errors
+            Log.d("=====Exception=====", "${exception} ")
+//            error = "網絡錯誤"
+            error = exception.message.toString()
         }
+
+
+
     }
 
     /**

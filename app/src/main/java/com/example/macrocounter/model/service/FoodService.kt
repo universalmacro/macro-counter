@@ -2,6 +2,7 @@ package com.example.macrocounter.model.service
 
 import com.example.macrocounter.model.Network
 import com.example.macrocounter.model.entity.FoodEntity
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Path
@@ -12,7 +13,7 @@ interface FoodService {
     suspend fun list(
         @Header("Authorization")token: String,
         @Path("spaceId") spaceId: String,
-    ): Array<FoodEntity>
+    ): Response<List<FoodEntity>?>
 
 
     companion object {

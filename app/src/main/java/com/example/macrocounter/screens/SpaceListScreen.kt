@@ -18,6 +18,8 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,12 +58,16 @@ fun SpaceListScreen(
     val userViewModel = LocalUserViewModel.current
     val spaceViewModel = LocalSpaceViewModel.current
     val tableViewModel = LocalTableViewModel.current
+    val showingDialog = remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
 //
         //獲取空間列表
         userViewModel.userInfo?.token?.let { spaceViewModel.fetchSpaceList(token = it) }
-
+        Log.d("=====spaceViewModel=======", "${spaceViewModel.error} ")
+        if(spaceViewModel.error != ""){
+            showingDialog.value = true
+        }
     }
 
     val coroutineScope = rememberCoroutineScope()
@@ -70,6 +76,29 @@ fun SpaceListScreen(
 //    lazyListState.OnBottomReached(buffer = 3) {
 //        coroutineScope.launch { if (vm.showSpaceList) userViewModel.userInfo?.token?.let { spaceViewModel.loadMore(token = it) } }
 //    }
+
+
+    if (showingDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                showingDialog.value = false
+            },
+
+            title = { Text(text = "錯誤：${ spaceViewModel.error}") },
+
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showingDialog.value = false
+                    },
+                    modifier = Modifier
+                        .padding(16.dp)
+                ) {
+                    Text("確認")
+                }
+            },
+        )
+    }
 
     Column(modifier = Modifier) {
 
@@ -125,17 +154,17 @@ fun SpaceListScreen(
         SwipeRefresh(
             modifier = Modifier.padding(20.dp, 0.dp),
             state = rememberSwipeRefreshState(isRefreshing = spaceViewModel.refreshing ),
-            onRefresh = { coroutineScope.launch { userViewModel.userInfo?.token?.let {
-                spaceViewModel.refresh(
-                    it
-                )
-            } } }
+            onRefresh = { coroutineScope.launch {
+                userViewModel.userInfo?.token?.let { spaceViewModel.refresh(it) }
+            }
+
+            }
+
         ) {
 //            LazyColumn(state = lazyListState) {
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 250.dp)
             ){
-                //文章列表
                 items(spaceViewModel.list) { space ->
                     SpaceItem(
                         space,

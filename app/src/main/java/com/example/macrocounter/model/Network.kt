@@ -1,30 +1,40 @@
 package com.example.macrocounter.model
 
+import android.content.Context
+import androidx.compose.runtime.Composable
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.preferencesDataStore
+import com.example.macrocounter.compositionLocal.LocalUserViewModel
+import com.example.macrocounter.model.service.UserInfoManager
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-
+import java.util.concurrent.TimeUnit
+import java.util.prefs.Preferences
 
 object Network {
 
-
-    //文档地址：https://docs.apipost.cn/preview/1a28e17fa3c8f473/16838456ae6dc5c7
-    //mock 数据请求 url
-//    private const val baseUrl =
-//        "https://mock.apipost.cn/app/mock/project/ced69cf2-9206-4a42-895e-dd7442a888df/"
-
     private const val baseUrl = "https://uat.uat-hongkong-1.universalmacro.com/"
 
-    var logging = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
-    val httpClient = OkHttpClient.Builder().addInterceptor(logging)
+    //    var baseUrl = UserInfoManager.URL
+//    val userViewModel = LocalUserViewModel.current
 
+
+    var logging = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
+
+    val httpClient = OkHttpClient.Builder()
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .writeTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .addInterceptor(logging)//.addInterceptor(TokenInterceptor())
 
 
     private val retrofit = Retrofit.Builder()
         .baseUrl(baseUrl)
+//        .baseUrl(UserInfoManager.getInstance(this))
         .client(httpClient.build())
         .addConverterFactory(
             MoshiConverterFactory.create(
@@ -34,9 +44,13 @@ object Network {
             )
         ).build()
 
+
+
     fun <T> createService(clazz: Class<T>): T {
         return retrofit.create(clazz)
     }
 }
+
+
 
 

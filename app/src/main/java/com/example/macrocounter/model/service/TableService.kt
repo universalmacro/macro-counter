@@ -3,6 +3,7 @@ package com.example.macrocounter.model.service
 import com.example.macrocounter.model.Network
 import com.example.macrocounter.model.entity.SpaceListResponse
 import com.example.macrocounter.model.entity.TableEntity
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Path
@@ -14,7 +15,7 @@ interface TableService {
     suspend fun list(
         @Header("Authorization")token: String,
         @Path("spaceId") spaceId: String,
-    ): Array<TableEntity>
+    ): Response<List<TableEntity>?>
 
 
     companion object {

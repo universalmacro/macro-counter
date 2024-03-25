@@ -1,7 +1,5 @@
 package com.example.macrocounter.viewModel
 
-
-//import okhttp3.internal.and
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -14,6 +12,7 @@ import com.example.macrocounter.model.service.UserInfoManager
 import com.example.macrocounter.model.service.UserService
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import java.security.MessageDigest
 
 
@@ -23,8 +22,8 @@ class UserViewModel(context: Context) : ViewModel() {
     private val userService = UserService.instance()
 
     var account by mutableStateOf("")
-
     var password by mutableStateOf("")
+    var baseUrl by mutableStateOf("")
 
     var userInfo: UserInfoEntity? = null
         private set
@@ -38,6 +37,11 @@ class UserViewModel(context: Context) : ViewModel() {
             } else {
                 null
             }
+            baseUrl = userInfoManager.url.firstOrNull().toString()
+            account = userInfoManager.account.firstOrNull().toString()
+            password = userInfoManager.password.firstOrNull().toString()
+
+            Log.d("--------Login---------", userInfo.toString())
         }
     }
 
@@ -54,6 +58,33 @@ class UserViewModel(context: Context) : ViewModel() {
     var error by mutableStateOf("")
         private set
 
+
+    /**
+     * 儲存 BASEPATH
+     *
+     */
+    suspend fun saveBaseUrl() {  //onClose: () -> Unit
+        error = ""
+        loading = true
+        viewModelScope.launch {
+            userInfoManager.saveUrl(baseUrl)
+        }
+        loading = false
+    }
+
+    suspend fun savePassword() {  //onClose: () -> Unit
+        viewModelScope.launch {
+            userInfoManager.savePassword(account, password)
+        }
+    }
+
+    suspend fun clearPassword() {  //onClose: () -> Unit
+        viewModelScope.launch {
+            userInfoManager.clearPassword()
+        }
+    }
+
+
     /**
      * 登录操作
      *
@@ -61,24 +92,20 @@ class UserViewModel(context: Context) : ViewModel() {
     suspend fun login(onClose: () -> Unit) {  //onClose: () -> Unit
         error = ""
         loading = true
-//        val token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDk3MjA5NzUsImp0aSI6IjE3NjI3ODcxMjA5MzE0MDU4MjQiLCJpZCI6IjE3NjI3ODcxMjA5MzE0MDU4MjQiLCJtZXJjaGFudElkIjoiMSIsImFjY291bnQiOiIiLCJ0eXBlIjoiTUFJTiJ9.tupGG71prl5vVoON5hvJfz2-AqSPC-PPvbHxf8_LTOg"
-//        userInfo = UserInfoEntity(token)
-//        viewModelScope.launch {
-//            userInfoManager.save(token)
-//        }
-//        onClose()
         try {
-            val res = userService.signIn(UserService.AuthData(account, sha256(sha256(password))))
-            Log.d("Login==Result", " ${res}" )
-
-            if (res?.token != null) {
-                userInfo = UserInfoEntity(res?.token)
-                userInfoManager.save(res?.token)
-                onClose()
-            } else {
+            val res = userService.signIn(UserService.AuthData(account.replace("\\s".toRegex(), ""), sha256(sha256(password))))
+            if (res.isSuccessful) {
+                if (res?.body()?.token != null) {
+                    userInfo = UserInfoEntity(res?.body()?.token!!)
+                    userInfoManager.save(res?.body()?.token!!)
+                    onClose()
+                }
+            }
+            else {
                 //失败
-                Log.d("Erreo->Result", " ${res.error} " )
-                error = res.message
+                val jsonObj = JSONObject(res.errorBody()!!.charStream().readText())
+                Log.d("Erreo->Result", " ${jsonObj} " )
+                error = jsonObj.toString()
             }
             // handle data
         } catch (exception: Exception) {
@@ -89,7 +116,7 @@ class UserViewModel(context: Context) : ViewModel() {
         loading = false
     }
 
-    fun sha256(content: String): String {
+    private fun sha256(content: String): String {
         val hash = MessageDigest.getInstance("SHA-256").digest(content.toByteArray())
         val hex = StringBuilder(hash.size * 2)
         for (b in hash) {
@@ -105,7 +132,7 @@ class UserViewModel(context: Context) : ViewModel() {
 
     fun clear() {
         viewModelScope.launch {
-            userInfoManager.clear() //清除本地数据存储
+            userInfoManager.clearLogin() //清除本地数据存储
             userInfo = null //置空内存数据
         }
     }

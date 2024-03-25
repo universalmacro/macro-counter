@@ -3,17 +3,23 @@ package com.example.macrocounter.screens
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.progressSemantics
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
+import androidx.compose.material.Checkbox
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mail
@@ -21,6 +27,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -73,6 +80,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
 import com.example.macrocounter.viewModel.UserViewModel
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.text.font.FontWeight
+import kotlinx.coroutines.delay
 
 @Composable
 fun LoginScreen(onClose: () -> Unit){
@@ -84,13 +93,10 @@ fun LoginScreen(onClose: () -> Unit){
     ) {
 
         val showingDialog = remember { mutableStateOf(false) }
-
-        val passwordVisible = remember {
-            mutableStateOf(false)
-        }
-
         val userViewModel = LocalUserViewModel.current
         val coroutineScope = rememberCoroutineScope()
+        var loading by remember { mutableStateOf(false) }
+        var checked by remember { mutableStateOf(false) }
 
 
         if (showingDialog.value) {
@@ -102,8 +108,6 @@ fun LoginScreen(onClose: () -> Unit){
                 title = {
                     Text(text = "${userViewModel.error}")
                 },
-
-
                 confirmButton = {
                     TextButton(
                         onClick = {
@@ -124,15 +128,11 @@ fun LoginScreen(onClose: () -> Unit){
                 .padding(16.dp)
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
-
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             NormalTextComponent(value = stringResource(id = R.string.app_name))
             HeadingTextComponent(value = stringResource(id = R.string.login))
             Spacer(modifier = Modifier.height(30.dp))
-//            CommonTextField(labelValue = stringResource(id = R.string.username), painterResource = painterResource(
-//                id = R.drawable.ic_launcher_foreground
-//            ))
             SimpleOutlinedTextFieldSample(
                 value = userViewModel.account,
                 onValueChange = { userViewModel.account = it })
@@ -140,14 +140,44 @@ fun LoginScreen(onClose: () -> Unit){
             SimpleOutlinedPasswordTextField(
                 value = userViewModel.password,
                 onValueChange = { userViewModel.password = it })
-//            PasswordTextField(labelValue = stringResource(id = R.string.passord), painterResource = painterResource(
-//                id = R.drawable.ic_launcher_foreground
-//            ))
             Spacer(modifier = Modifier.height(30.dp))
 
+
+            Row(
+                modifier = Modifier.padding(100.dp, 0.dp)
+            ) {
+                Row(modifier = Modifier.weight(1f)) {
+                    Checkbox(checked = checked,
+                        onCheckedChange = {
+                           checked = it
+                        }
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    androidx.compose.material.Text(
+                        text = "記住密碼",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = Color.Black,
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+
             Button(
+                enabled = !loading,
                 onClick = {
+                    loading = true
+
                     coroutineScope.launch{
+
+                        if (checked){
+                            userViewModel.savePassword()
+                        }else{
+                            userViewModel.clearPassword()
+                        }
 
                         userViewModel.login(onClose = onClose)
 
@@ -156,6 +186,7 @@ fun LoginScreen(onClose: () -> Unit){
                             showingDialog.value = true
                         }
 
+                        loading = false
 
                     }
                 },
@@ -167,17 +198,14 @@ fun LoginScreen(onClose: () -> Unit){
                     text = "登錄"
                 )
             }
+            if (loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.progressSemantics().size(32.dp)
+                )
+            }
         }
-//    }
     }
 }
-
-//
-//@Preview
-//@Composable
-//fun LoginScreenPreview(){
-//    LoginScreen()
-//}
 
 
 
@@ -188,7 +216,6 @@ fun SimpleOutlinedTextFieldSample(
     onValueChange: (String) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    var text by rememberSaveable { mutableStateOf("") }
 
     OutlinedTextField(
         value = value,
@@ -196,8 +223,8 @@ fun SimpleOutlinedTextFieldSample(
         shape = RoundedCornerShape(topEnd =12.dp, bottomStart =12.dp),
         label = {
             Text("用戶名",
-//                color = MaterialTheme.colorScheme.primary,
-//                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.labelMedium,
             ) },
         placeholder = { Text(text = "用戶名或郵箱") },
         keyboardOptions = KeyboardOptions(
@@ -215,9 +242,7 @@ fun SimpleOutlinedTextFieldSample(
                 // do something here
             }
         )
-
     )
-
 }
 
 //password

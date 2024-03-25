@@ -55,6 +55,8 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import kotlin.time.Duration.Companion.seconds
+import androidx.compose.material3.ButtonColors
+import com.example.macrocounter.components.CustomDialog
 
 
 private fun getDateTime(s: String): String? {
@@ -86,12 +88,14 @@ fun SelectTableScreen(
 
     val showingDialog = remember { mutableStateOf(false) }
     var selectedOrderIds = remember { mutableStateListOf<String>() }
-    val amount = remember { mutableStateOf<String>("0") }
+    val amount = remember { mutableStateOf<String>("") }
 
     val message = remember { mutableStateOf("Edit Me") }
+    val title = remember { mutableStateOf("請輸入金額") }
+
 
     val openDialog = remember { mutableStateOf(false) }
-    val openPrint = remember { mutableStateOf(false) }
+    val openPrint = remember { mutableStateOf("ADD") }
 
     val editMessage = remember { mutableStateOf("") }
 
@@ -207,8 +211,6 @@ fun SelectTableScreen(
         }
 
 
-
-
         Row {
 
             Column (
@@ -220,7 +222,6 @@ fun SelectTableScreen(
 //                    .border(2.dp, Color.Red, RoundedCornerShape(10.dp)),
             ){
 
-
                 var selectedTableOrder = tableViewModel.orderList
 
                 if(tableViewModel.selectedTable!=null)
@@ -228,7 +229,7 @@ fun SelectTableScreen(
                         .toTypedArray()
 
 
-                if(selectedTableOrder.size > 0){
+                if(selectedTableOrder.isNotEmpty()){
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -313,58 +314,107 @@ fun SelectTableScreen(
                                 Text(text = "桌號：${e.tableLabel}")
                                 Text(text = "狀態：${e.status}")
                                 Text(text = "時間：${getDateTime(e.createdAt)}")
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(0.dp, 10.dp, 0.dp, 0.dp)
+                                ){
+                                    FilledTonalButton(
+                                        shape = RoundedCornerShape(5.dp),
+                                        onClick = {
+                                            coroutineScope.launch{
+                                                tableViewModel.selectedOrder = e
+
+                                                openDialog.value = true
+                                                openPrint.value = "TABLE"
+
+                                                title.value = "請輸入桌號"
+
+
+                                            }
+                                        },
+                                    ) {
+                                        Text(
+                                            text = "更換桌號",
+                                            textAlign = TextAlign.Center,
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(8.dp))
+
+
+                                    FilledTonalButton(
+                                        shape = RoundedCornerShape(5.dp),
+                                        onClick = {
+                                            tableViewModel.selectedOrder = e
+
+                                            tableViewModel.selectedTable = TableEntity(id=e.tableLabel, label=e.tableLabel)
+                                            tableViewModel.selectedOrder?.tableLabel?.let { onNavigateToOrder(it) }
+                                        },
+                                    ) {
+                                        Text(
+                                            text = "加單",
+                                            textAlign = TextAlign.Center,
+                                        )
+                                    }
+                                }
+
                             }
                         }
                     }
 
 
-//                    }
 
-                 }
+                }
 
 
                 Column (
                     modifier = Modifier.fillMaxWidth(),
                 ){
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp),
+                    
+                    if(selectedTableOrder.isNotEmpty()){
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(10.dp),
 //                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ){
-                        FilledTonalButton(
-                            shape = RoundedCornerShape(5.dp),
-                            enabled = selectedOrderIds.size > 0,
-                            onClick = {
-                                coroutineScope.launch{
-                                    openDialog.value = true
-                                    openPrint.value = true
-                                }
-                            },
+                        ){
+                            FilledTonalButton(
+                                shape = RoundedCornerShape(5.dp),
+                                enabled = selectedOrderIds.size > 0,
+                                onClick = {
+                                    coroutineScope.launch{
+                                        openDialog.value = true
+                                        openPrint.value = "PRINT"
+                                    }
+                                },
 //                            modifier = Modifier.fillMaxWidth(0.5F)
-                        ) {
-                            Text(
-                                text = "打印訂單",
-                                textAlign = TextAlign.Center,
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
+                            ) {
+                                Text(
+                                    text = "打印訂單",
+                                    textAlign = TextAlign.Center,
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
 
 
-                        FilledTonalButton(
-                            shape = RoundedCornerShape(5.dp),
-                            enabled = selectedOrderIds.size > 0,
-                            onClick = {
-                                openDialog.value = true
-                                openPrint.value = false
-                            },
-                        ) {
-                            Text(
-                                text = "完成訂單",
-                                textAlign = TextAlign.Center,
-                            )
+                            FilledTonalButton(
+                                shape = RoundedCornerShape(5.dp),
+                                enabled = selectedOrderIds.size > 0,
+                                onClick = {
+                                    openDialog.value = true
+                                    openPrint.value = "FIN"
+                                    title.value = "請輸入金額"
+                                },
+                            ) {
+                                Text(
+                                    text = "完成訂單",
+                                    textAlign = TextAlign.Center,
+                                )
+                            }
                         }
                     }
+
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -390,10 +440,6 @@ fun SelectTableScreen(
                         }
                     }
                 }
-
-
-
-
             }
 
 
@@ -480,17 +526,26 @@ fun SelectTableScreen(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            CustomDialog(message, openDialog, amount, onOk = {
+            CustomDialog(title, message, openDialog, amount, onOk = {
                 coroutineScope.launch{
-                    if(openPrint.value){
+                    Log.d("=========================", openPrint.value)
+                    if(openPrint.value == "PRINT"){
                         userViewModel.userInfo?.token?.let {
                             tableViewModel.printBill(token = it, printBillRequest = OrderService.CreateBillRequest(
                                 orderIds = selectedOrderIds, amount = amount.value.toInt()))
                         }
-                    }else{
+                    }else if(openPrint.value == "FIN"){
                         userViewModel.userInfo?.token?.let {
                             tableViewModel.createBill(token = it, createBillRequest = OrderService.CreateBillRequest(
                                 orderIds = selectedOrderIds, amount = amount.value.toInt()))
+                        }
+                    }else if(openPrint.value == "TABLE"){
+                        // 更換桌號 switchTable
+                        userViewModel.userInfo?.token?.let {
+                            tableViewModel.selectedOrder?.let { it1 ->
+                                tableViewModel.switchTable(token = it, updateLabelRequest = OrderService.UpdateLabelRequest(
+                                    tableLabel = amount.value), orderId = it1.id)
+                            }
                         }
                     }
                     // 清除選擇的 order
@@ -500,60 +555,4 @@ fun SelectTableScreen(
         }
     }
 
-}
-
-
-@Composable
-fun CustomDialog(
-    message: MutableState<String>,
-    openDialog: MutableState<Boolean>,
-    editMessage: MutableState<String>,
-    onOk: ()->Unit
-) {
-    Column(
-        modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
-            .background(MaterialTheme.colors.background)
-            .padding(8.dp),
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-        ) {
-            Text(text = "請輸入金額")
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            TextField(
-                value = editMessage.value,
-                onValueChange = { if (it.isDigitsOnly()) editMessage.value = it },
-                singleLine = true
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier.align(Alignment.End)
-        ) {
-            Button(
-                onClick = {
-                    openDialog.value = false
-                }
-            ) {
-                Text("取消")
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Button(
-                onClick = {
-                    message.value = editMessage.value
-                    openDialog.value = false
-                    onOk()
-                }
-            ) {
-                Text("確認")
-            }
-        }
-    }
 }

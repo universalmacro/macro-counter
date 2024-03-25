@@ -10,6 +10,7 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -29,6 +30,10 @@ interface OrderService {
 
     data class OrderRequest(
         val foods: List<CartItemEntity?>
+    )
+
+    data class UpdateLabelRequest(
+        val tableLabel:  String
     )
 
 
@@ -60,7 +65,7 @@ interface OrderService {
         @Path("spaceId") spaceId: String,
         @Query("statuses") statuses: List<String>? = null,
         @Query("tableLabels") tableLabels: List<String>? = null,
-    ): List<OrderEntity>
+    ): Response<List<OrderEntity>>
 
 
     @POST("orders/bills")
@@ -75,6 +80,13 @@ interface OrderService {
         @Body printBillRequest: CreateBillRequest
     ): CreateBillRequest
 
+
+    @PUT("orders/{orderId}/tableLabel")
+    suspend fun switchTable(
+        @Header("Authorization")token: String,
+        @Path("orderId") orderId: String,
+        @Body updateLabelRequest: UpdateLabelRequest
+    )
 
     companion object {
         fun instance(): OrderService {

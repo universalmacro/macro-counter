@@ -67,31 +67,16 @@ fun NavHostApp() {
                         )
                     },
                 ) {
-                    LoginScreen {
+                    if (userViewModel.logged) {
                         //已登录
                         navController.navigate(Destinations.HomeFrame.route)
+                    } else {
+                        //未登录
+                        LoginScreen {
+                            //已登录
+                            navController.navigate(Destinations.HomeFrame.route)
+                        }
                     }
-//                    if (userViewModel.logged) {
-//                        //已登录
-//                        MainFrame(onNavigateToArticle = {
-//
-////                        navController.navigate(Destinations.ArticleDetail.route)
-//                        }, onNavigateToVideo = {
-////                        navController.navigate(Destinations.VideoDetail.route)
-//                        }, onNavigateToSpace = {
-//                            Log.i("===", "onNavigateToSelectTable")
-//                            if (userViewModel.logged) {
-//                                //已登录
-//                                navController.navigate(Destinations.HomeFrame.route)
-//                            } else {
-//                                //未登录
-//                                navController.navigate(Destinations.Login.route)
-//                            }
-//                        })
-//                    } else {
-//                        //未登录
-//                        navController.navigate(Destinations.Login.route)
-//                    }
 
                 }
 

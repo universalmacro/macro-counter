@@ -65,10 +65,6 @@ import com.example.macrocounter.model.entity.TableEntity
 import com.example.macrocounter.viewModel.AttributeViewModel
 import com.example.macrocounter.viewModel.SpaceViewModel
 import com.example.macrocounter.viewModel.MainViewModel
-import com.example.macrocounter.viewModel.UserViewModel
-import com.example.macrocounter.components.QuantitySelector
-import com.example.macrocounter.model.entity.CartItemEntity
-import kotlinx.coroutines.coroutineScope
 
 import kotlinx.coroutines.launch
 
@@ -87,8 +83,6 @@ fun OrderScreen(
     val spaceViewModel = LocalSpaceViewModel.current
     val tableViewModel = LocalTableViewModel.current
     val foodViewModel = LocalFoodViewModel.current
-
-
 
 
     LaunchedEffect(Unit) {
